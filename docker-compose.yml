@@ -1,0 +1,44 @@
+
+services:
+  nginx-proxy-server:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy-server
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  db:
+    image: mariadb
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - "8001:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - "8002:80"
+    links:
+      - db:mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - VIRTUAL_HOST=phpmyadmin.app
+      - VIRTUAL_PORT=8002
+
+energieausweis:
+    image: wordpress
+    volumes:
+      - ./energieausweis:/var/www/html
+    ports:
+      - "8003:80"
+    links:
+      - db:mysql
+    environment:
+      - WORDPRESS_DB_NAME=energieausweis
+      - WORDPRESS_DB_PASSWORD=secret
+      - VIRTUAL_HOST=energieausweis.dev
+      - VIRTUAL_PORT=8003
+
+volumes:
+  mysql:
